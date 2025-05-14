@@ -11,7 +11,7 @@
 ---
 
 ## 📁 Структура проекта
-.
+```.
 ├── docker/
 │ ├── nginx/
 │ │ └── default.conf
@@ -22,13 +22,16 @@
 ├── .env # Переменные окружения
 ├── docker-compose.yml
 └── README.md
+```
 
 ---
 
 ## ⚙️ Переменные `.env`
 
 ```env
-APP_PORT=8080
+COMPOSE_PROJECT_NAME=app
+APP_PORT=80
+XDEBUG_MODE=debug
 
 DB_HOST=db
 DB_NAME=yii2db
@@ -39,4 +42,4 @@ DB_PASSWORD=secret
 ---
 ## 🚀 Запуск
 - docker-compose up -d --build
-- http://localhost:8080
+- http://localhost
