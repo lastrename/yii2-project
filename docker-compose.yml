@@ -23,6 +23,7 @@ services:
   nginx:
     build:
       context: ./docker/nginx
+    container_name: yii2-nginx
     ports:
       - "${APP_PORT}:80"
     networks:
