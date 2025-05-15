@@ -26,6 +26,9 @@
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/ezyang/htmlpurifier" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/fakerphp/faker" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/guzzlehttp/psr7" />
+      <excludeFolder url="file://$MODULE_DIR$/src/vendor/kartik-v/yii2-krajee-base" />
+      <excludeFolder url="file://$MODULE_DIR$/src/vendor/kartik-v/yii2-widget-datepicker" />
+      <excludeFolder url="file://$MODULE_DIR$/src/vendor/kartik-v/yii2-widget-select2" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/masterminds/html5" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/myclabs/deep-copy" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/nikic/php-parser" />
@@ -60,6 +63,7 @@
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/sebastian/recursion-context" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/sebastian/type" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/sebastian/version" />
+      <excludeFolder url="file://$MODULE_DIR$/src/vendor/select2/select2" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/staabm/side-effects-detector" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/symfony/browser-kit" />
       <excludeFolder url="file://$MODULE_DIR$/src/vendor/symfony/console" />

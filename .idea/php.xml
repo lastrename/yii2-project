@@ -106,6 +106,10 @@
       <path value="$PROJECT_DIR$/src/vendor/codeception/module-filesystem" />
       <path value="$PROJECT_DIR$/src/vendor/codeception/verify" />
       <path value="$PROJECT_DIR$/src/vendor/codeception/lib-asserts" />
+      <path value="$PROJECT_DIR$/src/vendor/kartik-v/yii2-krajee-base" />
+      <path value="$PROJECT_DIR$/src/vendor/kartik-v/yii2-widget-datepicker" />
+      <path value="$PROJECT_DIR$/src/vendor/kartik-v/yii2-widget-select2" />
+      <path value="$PROJECT_DIR$/src/vendor/select2/select2" />
     </include_path>
   </component>
   <component name="PhpInterpreters">
@@ -177,6 +181,11 @@
   </component>
   <component name="PhpStanOptionsConfiguration">
     <option name="transferred" value="true" />
+  </component>
+  <component name="PhpUnit">
+    <phpunit_settings>
+      <PhpUnitSettings custom_loader_path="$PROJECT_DIR$/src/vendor/autoload.php" />
+    </phpunit_settings>
   </component>
   <component name="PsalmOptionsConfiguration">
     <option name="transferred" value="true" />

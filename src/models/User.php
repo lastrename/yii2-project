@@ -2,103 +2,215 @@
 
 namespace app\models;
 
-class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
+use Yii;
+use yii\base\Exception;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
+use yii\db\Query;
+use yii\web\IdentityInterface;
+
+/**
+ * Class User
+ *
+ * @property int $id
+ * @property string $username
+ * @property string $full_name
+ * @property string $password_hash
+ * @property string|null $auth_key
+ * @property string $role
+ * @property string|null $access_token
+
+ */
+class User extends ActiveRecord implements IdentityInterface
 {
-    public $id;
-    public $username;
-    public $password;
-    public $authKey;
-    public $accessToken;
+    const ROLE_USER = 'USER';
+    const ROLE_ADMIN = 'ADMIN';
 
-    private static $users = [
-        '100' => [
-            'id' => '100',
-            'username' => 'admin',
-            'password' => 'admin',
-            'authKey' => 'test100key',
-            'accessToken' => '100-token',
-        ],
-        '101' => [
-            'id' => '101',
-            'username' => 'demo',
-            'password' => 'demo',
-            'authKey' => 'test101key',
-            'accessToken' => '101-token',
-        ],
-    ];
-
+    private string $password;
 
     /**
-     * {@inheritdoc}
+     * @return string
      */
-    public static function findIdentity($id)
+    public static function tableName(): string
     {
-        return isset(self::$users[$id]) ? new static(self::$users[$id]) : null;
+        return 'user';
     }
 
     /**
-     * {@inheritdoc}
+     * Поведения для даты создания и изменения
+     *
+     * @return array
      */
-    public static function findIdentityByAccessToken($token, $type = null)
+    public function behaviors(): array
     {
-        foreach (self::$users as $user) {
-            if ($user['accessToken'] === $token) {
-                return new static($user);
-            }
+        return [
+            TimestampBehavior::class,
+        ];
+    }
+
+    /**
+     * @param $insert
+     * @return bool
+     * @throws Exception
+     */
+    public function beforeSave($insert): bool
+    {
+        if ($insert) {
+            $this->auth_key = Yii::$app->security->generateRandomString();
+            $this->access_token = Yii::$app->security->generateRandomString(64);
         }
 
-        return null;
+        return parent::beforeSave($insert);
     }
 
     /**
-     * Finds user by username
+     * @return string[]
+     */
+    public function attributeLabels(): array
+    {
+        return [
+            'username' => 'Логин',
+            'full_name' => 'ФИО',
+            'password' => 'Пароль',
+            'role' => 'Роль',
+            'created_at' => 'Создан',
+            'updated_at' => 'Обновлён',
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [
+            [['username', 'role'], 'required'],
+            [['username', 'full_name'], 'string', 'min' => 3, 'max' => 255],
+            [['username'], 'unique'],
+
+            [['role'], 'in', 'range' => [self::ROLE_USER, self::ROLE_ADMIN]],
+
+            [['password'], 'safe'], // если не обязательно
+
+            [['auth_key', 'access_token'], 'string', 'max' => 255],
+        ];
+    }
+
+    /**
+     * Поиск пользователя по ID (для сессий)
+     *
+     * @param $id
+     * @return IdentityInterface|null
+     */
+    public static function findIdentity($id): ?IdentityInterface
+    {
+        return static::findOne($id);
+    }
+
+    /**
+     * Поиск пользователя по access token (если используется, например, для API)
+     *
+     * @param $token
+     * @param $type
+     * @return IdentityInterface|null
+     */
+    public static function findIdentityByAccessToken($token, $type = null): ?IdentityInterface
+    {
+        return static::findOne(['access_token' => $token]);
+    }
+
+    /**
+     * Поиск пользователя по логину
      *
      * @param string $username
      * @return static|null
      */
-    public static function findByUsername($username)
+    public static function findByUsername(string $username): ?self
     {
-        foreach (self::$users as $user) {
-            if (strcasecmp($user['username'], $username) === 0) {
-                return new static($user);
-            }
-        }
-
-        return null;
+        return static::findOne(['username' => $username]);
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getAuthKey()
-    {
-        return $this->authKey;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function validateAuthKey($authKey)
-    {
-        return $this->authKey === $authKey;
-    }
-
-    /**
-     * Validates password
+     * ID пользователя
      *
-     * @param string $password password to validate
-     * @return bool if password provided is valid for current user
+     * @return int|string|null
      */
-    public function validatePassword($password)
+    public function getId(): int|string|null
     {
-        return $this->password === $password;
+        return $this->getPrimaryKey();
+    }
+
+    /**
+     * Ключ авторизации для куки
+     *
+     * @return string
+     */
+    public function getAuthKey(): string
+    {
+        return $this->auth_key;
+    }
+
+    /**
+     * Проверка ключа авторизации
+     *
+     * @param $authKey
+     * @return bool
+     */
+    public function validateAuthKey($authKey): bool
+    {
+        return $this->getAuthKey() === $authKey;
+    }
+
+    /**
+     * Проверка пароля (через password_hash)
+     *
+     * @param $password
+     * @return bool
+     */
+    public function validatePassword($password): bool
+    {
+        return Yii::$app->security->validatePassword($password, $this->password_hash);
+    }
+
+    /**
+     * Проверка, является ли пользователь администратором
+     *
+     * @return bool
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'ADMIN';
+    }
+
+    /**
+     * @param string $password
+     * @return void
+     * @throws Exception
+     */
+    public function setPassword(string $password): void
+    {
+        $this->password_hash = Yii::$app->security->generatePasswordHash($password);
+    }
+
+    public function getServiceLinks()
+    {
+        return $this->hasMany(ServiceUser::class, ['user_id' => 'id']);
+    }
+
+    public function getServiceLinksByTrip($tripId)
+    {
+        return $this->getServiceLinks()->andWhere(['trip_id' => $tripId]);
+    }
+
+    public function getTripStartDate($tripId)
+    {
+        return $this->getServiceLinksByTrip($tripId)
+            ->min('start_date');
+    }
+
+    public function getTripEndDate($tripId)
+    {
+        return $this->getServiceLinksByTrip($tripId)
+            ->max('end_date');
     }
 }
