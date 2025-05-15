@@ -37,11 +37,21 @@ $this->params['breadcrumbs'][] = $this->title;
             'title',
             [
                 'label' => 'Начало командировки',
-                'value' => fn($model) => $model->startDate ? Yii::$app->formatter->asDate($model->startDate) : '—',
+                'attribute' => 'start_date',
+                'format' => ['date', 'php:d.m.Y'],
+                'value' => function ($model) {
+                    /** @var app\models\Trip $model */
+                    return $model->startDate;
+                },
             ],
             [
                 'label' => 'Окончание командировки',
-                'value' => fn($model) => $model->endDate ? Yii::$app->formatter->asDate($model->endDate) : '—',
+                'attribute' => 'end_date',
+                'format' => ['date', 'php:d.m.Y'],
+                'value' => function ($model) {
+                    /** @var app\models\Trip $model */
+                    return $model->endDate;
+                },
             ],
             'created_at:datetime',
             'updated_at:datetime',
